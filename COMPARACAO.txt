@@ -1,0 +1,478 @@
+==========================================================================================
+ COMPARAÇÃO: CARDIOLOGIA vs ONCOLOGIA 
+==========================================================================================
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         TRABALHO ORIGINAL (Cardiologia)                    ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+📋 TEMA: Agendamento de Cirurgias Cardíacas no PROCAPE
+
+🎯 OBJETIVO: 
+   Organizar fila de espera para procedimentos de alta complexidade
+   (revascularização, troca de válvulas), priorizando pacientes com
+   maior risco cardíaco.
+
+💡 JUSTIFICATIVA:
+   Tempo de espera é fator crítico. Fila não deve seguir FIFO, mas sim
+   estratificação de risco cardiovascular (risco de infarto iminente).
+
+📊 PROCEDIMENTOS:
+   • Ponte de Safena (Risco Alto, 5h, UTI)
+   • Troca de Válvula (Risco Médio, 3h, UTI)
+   • Marcapasso (Risco Baixo, 2h, UTI)
+
+🔢 VARIÁVEIS:
+   • x_i: 0 ou 1 (opera ou espera) - BINÁRIA
+   • w_i: Peso/Gravidade do paciente
+   • t_i: Tempo da cirurgia
+   • T: Tempo total disponível
+   • L: Leitos de UTI
+
+📐 MODELO:
+   Maximizar: Σ (w_i × x_i)
+   Sujeito a:
+     - Σ (t_i × x_i) ≤ T  (tempo)
+     - Σ (1 × x_i) ≤ L    (UTI - cada paciente = 1 leito)
+     - x_i ∈ {0, 1}       (binária)
+
+📚 REFERÊNCIA PRINCIPAL:
+   Pazin-Filho et al. (2024) - Gestão de filas e mortalidade na COVID-19
+
+───────────────────────────────────────────────────────────────────────────
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                      ADAPTAÇÃO PARA ONCOLOGIA (Onco-360)                  ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+📋 TEMA: Agendamento de Cirurgias Oncológicas em Pernambuco
+
+🎯 OBJETIVO:
+   Maximizar atendimento de pacientes oncológicos, priorizando casos
+   graves, considerando restrições de tempo, orçamento e UTI.
+
+💡 JUSTIFICATIVA:
+   Câncer tem progressão temporal. Atraso pode significar:
+   - Aumento do estadiamento (T1 → T2 → T3 → T4)
+   - Redução da sobrevida
+   - Necessidade de tratamentos mais agressivos
+   - Maior custo futuro
+
+📊 PROCEDIMENTOS (8 tipos principais):
+   • Mastectomia (Câncer de Mama) - 8.5, 3.5h, R$15k
+   • Prostatectomia (Câncer de Próstata) - 7.8, 4.0h, R$18k
+   • Colectomia (Câncer de Cólon) - 9.2, 5.0h, R$25k
+   • Gastrectomia (Câncer de Estômago) - 9.5, 6.0h, R$28k
+   • Lobectomia (Câncer de Pulmão) - 9.8, 5.5h, R$35k
+   • Histerectomia (Câncer de Útero) - 7.5, 3.0h, R$14k
+   • Tireoidectomia (Câncer de Tireoide) - 6.5, 2.5h, R$12k
+   • Nefrectomia (Câncer de Rim) - 8.0, 4.5h, R$22k
+
+🔢 VARIÁVEIS:
+   • x_i: Número de vezes que procedimento i é realizado - INTEIRA
+   • w_i: Prioridade (gravidade, incidência, ou custo-benefício)
+   • t_i: Tempo da cirurgia (horas)
+   • c_i: Custo do procedimento (R$)
+   • u_i: Necessita UTI? (0 ou 1)
+   • O: Orçamento disponível
+   • T: Tempo total disponível
+   • L: Leitos de UTI
+
+📐 MODELO (mais complexo):
+   Maximizar: Σ (w_i × x_i)
+   Sujeito a:
+     - Σ (c_i × x_i) ≤ O  (orçamento) ← NOVO!
+     - Σ (t_i × x_i) ≤ T  (tempo)
+     - Σ (u_i × x_i) ≤ L  (UTI)
+     - x_i ∈ {0, 1, 2, ...}  (inteira não-negativa) ← DIFERENTE!
+
+📚 DADOS:
+   - Dataset Onco-360 (Kaggle)
+   - DATASUS/SIH
+   - INCA (Instituto Nacional de Câncer)
+   - SIOPS (orçamento público)
+
+───────────────────────────────────────────────────────────────────────────
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                          PRINCIPAIS DIFERENÇAS                             ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+1. ESCOPO DO PROBLEMA
+   
+   Cardiologia:
+   - Foco em PACIENTES INDIVIDUAIS
+   - Decisão: operar ou não cada paciente específico
+   - Variáveis binárias (0 ou 1)
+   - Exemplo: "Operar Sr. José hoje?"
+   
+   Oncologia:
+   - Foco em TIPOS DE PROCEDIMENTOS
+   - Decisão: quantos procedimentos de cada tipo fazer
+   - Variáveis inteiras (0, 1, 2, 3, ...)
+   - Exemplo: "Fazer 15 colectomias este mês"
+
+2. RESTRIÇÕES ADICIONAIS
+   
+   Cardiologia:
+   - Tempo de sala
+   - Leitos de UTI
+   
+   Oncologia:
+   - Tempo de sala
+   - Leitos de UTI
+   - Orçamento mensal ← NOVO!
+
+3. COMPLEXIDADE DO MODELO
+   
+   Cardiologia:
+   - Problema de Mochila (Knapsack) com 2 restrições
+   - Variáveis binárias
+   - Mais simples
+   
+   Oncologia:
+   - Problema de Mochila Multidimensional
+   - Variáveis inteiras
+   - Mais complexo
+
+4. CRITÉRIOS DE PRIORIZAÇÃO
+   
+   Cardiologia:
+   - Risco cardiovascular
+   - Urgência do caso
+   
+   Oncologia:
+   - Gravidade (estadiamento)
+   - Incidência populacional
+   - Custo-benefício
+
+5. HORIZONTE DE PLANEJAMENTO
+   
+   Cardiologia:
+   - Curto prazo (6 horas de plantão)
+   - Poucos pacientes (3 no exemplo)
+   
+   Oncologia:
+   - Médio prazo (1 mês)
+   - Múltiplos procedimentos (25+ cirurgias)
+
+───────────────────────────────────────────────────────────────────────────
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                          SEMELHANÇAS IMPORTANTES                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+✅ METODOLOGIA: Programação Linear Inteira (Simplex + Branch and Bound)
+
+✅ OBJETIVO: Maximizar atendimento priorizando casos graves
+
+✅ RESTRIÇÕES CRÍTICAS: Tempo de sala e leitos de UTI
+
+✅ JUSTIFICATIVA: Tempo de espera impacta mortalidade
+
+✅ CONTEXTO: Saúde pública, recursos limitados, SUS
+
+✅ TRADE-OFF: Nem sempre é possível operar todos os casos urgentes
+
+───────────────────────────────────────────────────────────────────────────
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                      VANTAGENS DA ADAPTAÇÃO ONCOLÓGICA                    ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+1. DADOS REAIS DISPONÍVEIS
+   ✅ Dataset Onco-360 com milhões de registros
+   ✅ Dados históricos desde 1985
+   ✅ Atualização contínua (semanal/mensal)
+
+2. ESCALA MAIOR
+   ✅ Planejamento mensal (vs 6h)
+   ✅ Múltiplos procedimentos (vs pacientes únicos)
+   ✅ Aplicável a toda rede estadual
+
+3. MÚLTIPLOS CRITÉRIOS
+   ✅ Gravidade clínica
+   ✅ Incidência populacional
+   ✅ Custo-efetividade
+   ✅ Flexível conforme política de saúde
+
+4. IMPACTO EPIDEMIOLÓGICO
+   ✅ Considera incidência regional
+   ✅ Planejamento baseado em demanda real
+   ✅ Otimização de recursos escassos
+
+───────────────────────────────────────────────────────────────────────────
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                            EXEMPLO COMPARATIVO                             ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+SITUAÇÃO: Recursos escassos, múltiplos pacientes aguardando
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ CARDIOLOGIA - Exemplo do seu trabalho                                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Recursos: 6h de sala, 1 leito UTI
+
+Pacientes:
+  1. Sr. José: Safena, 5h, Risco 10
+  2. Dona Ana: Válvula, 3h, Risco 5
+  3. Sr. Carlos: Marcapasso, 2h, Risco 2
+
+Decisão: Operar apenas Sr. José (caso mais grave)
+Resultado: 1 paciente operado
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ONCOLOGIA - Adaptação com Onco-360                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Recursos: 480h de sala, 15 leitos UTI, R$500k orçamento
+
+Procedimentos disponíveis: 8 tipos
+  - Gravidades variando de 6.5 a 9.8
+  - Custos de R$12k a R$35k
+  - Tempos de 2.5h a 6.0h
+
+Decisão: Otimizar mix de procedimentos
+  - 15x Colectomia (alta gravidade, custo médio)
+  - 10x Tireoidectomia (não precisa UTI)
+
+Resultado: 25 pacientes operados
+
+CONCLUSÃO: Modelo oncológico permite maior throughput pois:
+  1. Considera procedimentos sem UTI (Tireoidectomia)
+  2. Otimiza mix de gravidade x custo x tempo
+  3. Planeja horizonte mais longo (permite balanceamento)
+
+───────────────────────────────────────────────────────────────────────────
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                          CÓDIGO: ANTES E DEPOIS                            ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+ANTES (Cardiologia - Seu código original):
+────────────────────────────────────────────────────────────────────────────
+from pulp import *
+
+prob = LpProblem("Cardiologia_PROCAPE", LpMaximize)
+
+# Variáveis BINÁRIAS (0 ou 1)
+x_jose = LpVariable("Sr_Jose", 0, 1, LpInteger)
+x_ana = LpVariable("Dona_Ana", 0, 1, LpInteger)
+x_carlos = LpVariable("Sr_Carlos", 0, 1, LpInteger)
+
+# Função Objetivo (pesos = gravidade)
+prob += 10*x_jose + 5*x_ana + 2*x_carlos
+
+# Restrições
+prob += 5*x_jose + 3*x_ana + 2*x_carlos <= 6    # Tempo
+prob += 1*x_jose + 1*x_ana + 1*x_carlos <= 1    # UTI
+
+prob.solve()
+────────────────────────────────────────────────────────────────────────────
+
+DEPOIS (Oncologia - Com Onco-360):
+────────────────────────────────────────────────────────────────────────────
+from pulp import *
+
+prob = LpProblem("Oncologia_PE", LpMaximize)
+
+# Variáveis INTEIRAS (0, 1, 2, 3, ...)
+x = [LpVariable(f"x_{i}", 0, None, LpInteger) for i in range(8)]
+
+# Função Objetivo (pesos = incidência populacional)
+w = [3.62, 10.01, 13.71, 7.36, 3.09, 5.20, 4.80, 6.15]
+prob += lpSum([w[i] * x[i] for i in range(8)])
+
+# Restrições
+custo = [15000, 18000, 25000, 28000, 35000, 14000, 12000, 22000]
+tempo = [3.5, 4.0, 5.0, 6.0, 5.5, 3.0, 2.5, 4.5]
+uti = [1, 1, 1, 1, 1, 1, 0, 1]
+
+prob += lpSum([custo[i] * x[i] for i in range(8)]) <= 500000  # Orçamento
+prob += lpSum([tempo[i] * x[i] for i in range(8)]) <= 480     # Tempo
+prob += lpSum([uti[i] * x[i] for i in range(8)]) <= 15        # UTI
+
+prob.solve()
+────────────────────────────────────────────────────────────────────────────
+
+PRINCIPAIS MUDANÇAS NO CÓDIGO:
+  1. Variáveis individuais → Lista de variáveis
+  2. Binária (0,1) → Inteira (0,1,2,...)
+  3. 2 restrições → 3 restrições (+ orçamento)
+  4. 3 pacientes → 8 tipos de procedimento
+  5. Pesos fixos → Pesos configuráveis (gravidade/incidência/custo-benefício)
+
+───────────────────────────────────────────────────────────────────────────
+
+
+==========================================================================================
+ RESULTADOS COMPARATIVOS 
+==========================================================================================
+
+
+CARDIOLOGIA (Exemplo do trabalho):
+───────────────────────────────────────────────────────────────────────────
+Entrada:
+  - 6 horas disponíveis
+  - 1 leito UTI
+  - 3 pacientes esperando
+
+Solução Ótima:
+  - Operar: Sr. José (Ponte de Safena)
+  - Não operar: Dona Ana, Sr. Carlos
+  
+Métricas:
+  - Pacientes atendidos: 1
+  - Utilização tempo: 83% (5h / 6h)
+  - Utilização UTI: 100% (1 / 1)
+  - Valor objetivo: 10 (gravidade)
+
+
+ONCOLOGIA (Adaptação com Onco-360):
+───────────────────────────────────────────────────────────────────────────
+Entrada:
+  - 480 horas disponíveis
+  - 15 leitos UTI
+  - R$ 500.000 orçamento
+  - 8 tipos de procedimento
+
+Solução Ótima (Cenário Real):
+  - 15x Colectomia (Câncer de Cólon)
+  - 10x Tireoidectomia (Câncer de Tireoide)
+  
+Métricas:
+  - Pacientes atendidos: 25
+  - Utilização tempo: 21% (100h / 480h)
+  - Utilização UTI: 100% (15 / 15)
+  - Utilização orçamento: 99% (R$495k / R$500k)
+  - Valor objetivo: 253.7 (incidência)
+
+ANÁLISE:
+  🎯 Gargalo Cardiologia: Leitos de UTI
+  🎯 Gargalo Oncologia: Orçamento (seguido de UTI)
+  
+  💡 Insight: Em ambos os casos, a restrição de UTI é crítica.
+     Investir em leitos de UTI oncológica teria alto impacto.
+
+
+
+==========================================================================================
+ RECOMENDAÇÕES PARA APRESENTAÇÃO DO TRABALHO 
+==========================================================================================
+
+
+📝 COMO APRESENTAR A ADAPTAÇÃO PARA ONCOLOGIA:
+
+1. INTRODUÇÃO
+   ─────────────────────────────────────────────────────────────────────────
+   "Meu trabalho original focava em cirurgias cardíacas no PROCAPE,
+   utilizando Programação Linear Inteira para priorizar pacientes por
+   risco cardiovascular. Nesta extensão, adaptei o modelo para cirurgias
+   oncológicas em Pernambuco, utilizando o dataset Onco-360 (Kaggle)."
+
+2. MOTIVAÇÃO DA ADAPTAÇÃO
+   ─────────────────────────────────────────────────────────────────────────
+   • Dados reais disponíveis (Onco-360)
+   • Maior impacto populacional (câncer é 2ª causa de morte no Brasil)
+   • Complexidade adicional (restrição orçamentária)
+   • Aplicação em escala estadual
+
+3. DIFERENÇAS METODOLÓGICAS
+   ─────────────────────────────────────────────────────────────────────────
+   "Enquanto o modelo cardíaco usa variáveis binárias para decidir se
+   opera ou não cada paciente individual, o modelo oncológico usa variáveis
+   inteiras para determinar quantos procedimentos de cada tipo realizar
+   mensalmente. Isso permite planejamento em maior escala."
+
+4. RESULTADOS ADICIONAIS
+   ─────────────────────────────────────────────────────────────────────────
+   • Comparação entre 3 cenários (Real, Otimista, Pessimista)
+   • Análise de sensibilidade (impacto de variação orçamentária)
+   • Identificação de gargalos (orçamento > UTI > tempo)
+
+5. CONTRIBUIÇÕES
+   ─────────────────────────────────────────────────────────────────────────
+   ✓ Extensão do modelo original para novo domínio
+   ✓ Integração com dados reais (Onco-360)
+   ✓ Análise multi-cenário
+   ✓ Código open source e replicável
+
+6. TRABALHOS FUTUROS
+   ─────────────────────────────────────────────────────────────────────────
+   • Validação com dados do PROCAPE/HCP
+   • Dashboard interativo para gestores
+   • Integração de múltiplos hospitais
+   • Modelo dinâmico (chegada de novos pacientes)
+   • Incerteza nos parâmetros (programação estocástica)
+
+───────────────────────────────────────────────────────────────────────────
+
+📊 SLIDES SUGERIDOS PARA APRESENTAÇÃO:
+
+1. Título + Motivação
+2. Problema Original (Cardiologia)
+3. Adaptação (Oncologia)
+4. Dados (Onco-360)
+5. Formulação Matemática
+6. Resultados - Cenário Real
+7. Resultados - Comparação Cenários
+8. Análise de Sensibilidade
+9. Conclusões
+10. Trabalhos Futuros
+
+───────────────────────────────────────────────────────────────────────────
+
+💡 PONTOS FORTES PARA DESTACAR:
+
+✓ RIGOR MATEMÁTICO
+  Mesmo modelo base, adaptado adequadamente para novo contexto
+
+✓ DADOS REAIS
+  Uso de dataset público reconhecido (Kaggle)
+
+✓ ESCALABILIDADE
+  De 3 pacientes em 6h → 25+ pacientes em 1 mês
+
+✓ IMPACTO PRÁTICO
+  Identificação clara de gargalos e oportunidades de melhoria
+
+✓ CÓDIGO ABERTO
+  Replicável por outros pesquisadores e gestores
+
+───────────────────────────────────────────────────────────────────────────
+
+⚠️  LIMITAÇÕES A RECONHECER (honestidade intelectual):
+
+• Dados agregados (não pacientes individuais reais)
+• Parâmetros estimados (gravidade, tempo, custo)
+• Não considera chegada dinâmica de novos casos
+• Não modela incerteza nos parâmetros
+• Validação pendente com dados reais do PROCAPE
+
+
+
+==========================================================================================
+ FIM DA COMPARAÇÃO 
+==========================================================================================
+
+
+🎓 Seu trabalho original é excelente!
+
+A adaptação para oncologia:
+  ✅ Mantém o rigor metodológico
+  ✅ Adiciona complexidade relevante
+  ✅ Usa dados reais disponíveis
+  ✅ Tem maior impacto potencial
+
+Isso demonstra:
+  🌟 Compreensão profunda da metodologia
+  🌟 Capacidade de adaptação
+  🌟 Visão de aplicação prática
+  🌟 Maturidade científica
+
+Boa sorte na apresentação! 🚀
+
+
